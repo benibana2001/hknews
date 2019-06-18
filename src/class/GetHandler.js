@@ -1,11 +1,7 @@
 import _ from 'lodash';
 import api from '../hknews_config';
-import HkClient from './HkClient';
 
 let GetHandler = class {
-    constructor() {
-        this.hkClient = new HkClient();
-    }
     makeLodashTemplate(obj) {
         const template = _.template,
             $target = document.getElementById("cards"),
@@ -24,19 +20,41 @@ let GetHandler = class {
         };
         this.makeLodashTemplate(html);
     }
-    parseIndividual(res) {
-        let data = JSON.parse(res);
-        console.log(data);
-        this.writeHtml(data);
+
+    async getData(url) {
+        console.log("1. WAITING FOR CALL ASYNCH FUNCTION WILL RESOLVE");
+        let res = await this.fetchJSON(url);
+
+        console.log("4. INVOKE AFTER FUNCTION. THIS TIME, ASYNCH FUNC WAS ALREADY RESOLVED");
+        console.log(res);
+        let top_1 = res[0];
+        let obj = await this.fetchJSON(api.INDIVIDUAL + top_1 + ".json");
+        this.writeHtml(obj);
+        //
     }
-    // xxx
-    parseAry(res) {
-        let data = JSON.parse(res);
-        this.hkClient.fetchJSON(api.INDIVIDUAL + data[0] + ".json", this.parseIndividual.bind(this));
-        this.hkClient.fetchJSON(api.INDIVIDUAL + data[1] + ".json", this.parseIndividual.bind(this));
-    }
-    getData() {
-        this.hkClient.fetchJSON(api.TOP500, this.parseAry.bind(this));
+
+    fetchJSON(url) {
+        return new Promise((resolve, reject) => {
+            let request = new XMLHttpRequest();
+
+            console.log("2. INVOKE ASYNCH PROCESS");
+            request.open("GET", url);
+            request.onreadystatechange = function() {
+                if(request.readyState === 4 && request.status === 200) {
+                    let type = request.getResponseHeader("Content-Type");
+                    if(_.includes(type, "application/json")) {
+                        console.log("3. RESOLVE ASYNCH FUNCTION");
+                        let res = JSON.parse(request.responseText);
+                        resolve(res);
+                    }else{
+                        console.log("error: ", "Content-Type is nod 'application/json'");
+                        console.log(`Content-Tyep: ${type}`);
+                    }
+                }
+            };
+            console.log("FETCH JSON");
+            request.send(null);
+        });
     }
 };
 
