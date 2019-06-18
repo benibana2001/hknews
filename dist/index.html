@@ -25,15 +25,17 @@
 <div id="cards"></div>
 
 <script type="text/template" id="template">
+    <% _.forEach(data, (obj) => { %>
     <div class="card">
         <div id="card_01" class="title">
-            <a href="<%= link %>"><%= title %></a>
+            <a href="<%= obj.url %>"><%= obj.title %></a>
         </div>
         <div class="point">
-            <div class="score">SCORE: <%= score %></div>
-            <div class="comment">COMMENTS: <%= num_comments %></div>
+            <div class="score">SCORE: <%= obj.score %></div>
+            <div class="comment">COMMENTS: <%= obj.descendants %></div>
         </div>
     </div>
+    <% }); %>
 </script>
 
 <script src="./main.js"></script>
